@@ -1,47 +1,47 @@
-import express from 'express';
-import TelegramBot from 'node-telegram-bot-api';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
+import express from "express";
+import TelegramBot from "node-telegram-bot-api";
+import dotenv from "dotenv";
 
-// Load environment variables
 dotenv.config();
 
-// Get current directory
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
+app.use(express.json());
+app.use(express.static("public"));
 
-// Serve static files (HTML, CSS, JS) from 'public'
-app.use(express.static(path.join(__dirname, 'public')));
-
-const PORT = process.env.PORT || 3000;
-
-// Telegram bot setup
 const BOT_TOKEN = process.env.BOT_TOKEN;
-const WEBAPP_URL = process.env.WEBAPP_URL; // Example: https://your-service-name.onrender.com
+const WEBAPP_URL = process.env.WEBAPP_URL;
+const PORT = process.env.PORT || 3000;
+const OWNER_CHAT_ID = process.env.OWNER_CHAT_ID; // <-- Your personal Telegram ID
 
-if (!BOT_TOKEN || !WEBAPP_URL) {
-  console.error('❌ BOT_TOKEN or WEBAPP_URL is missing in environment variables.');
-  process.exit(1);
-}
+// Telegram bot (webhook mode)
+const bot = new TelegramBot(BOT_TOKEN, { polling: false });
 
-const bot = new TelegramBot(BOT_TOKEN, { polling: true });
-
-// When user sends /start
-bot.onText(/\/start/, (msg) => {
-  const chatId = msg.chat.id;
-
-  bot.sendMessage(chatId, "👋 Welcome! Click below to launch the mini app:", {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: "🚀 Launch Mini App", web_app: { url: WEBAPP_URL } }]
-      ]
-    }
-  });
+// Endpoint for Telegram webhook
+app.post(`/bot${BOT_TOKEN}`, (req, res) => {
+    bot.processUpdate(req.body);
+    res.sendStatus(200);
 });
 
+// Handle /start
+bot.onText(/\/start/, (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendMessage(chatId, "Welcome to Beyond Bot 🎉", {
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: "Open BeYond App", web_app: { url: WEBAPP_URL } }]
+            ]
+        }
+    });
+});
+
+// Start server
 app.listen(PORT, () => {
-  console.log(`✅ Mini App running at http://localhost:${PORT}`);
+    console.log(`✅ Mini App running at http://localhost:${PORT}`);
+
+    // Send test message when bot starts
+    if (OWNER_CHAT_ID) {
+        bot.sendMessage(OWNER_CHAT_ID, "🚀 Bot is Live and Running ✅");
+    } else {
+        console.log("⚠️ OWNER_CHAT_ID not set — no startup message sent.");
+    }
 });
