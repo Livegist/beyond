@@ -1,13 +1,16 @@
 {
-  "name": "telegram-mini-app",
+  "name": "beyond-mini-app",
   "version": "1.0.0",
+  "description": "Telegram mini app bot deployed on Render",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
+    "body-parser": "^1.20.2",
+    "dotenv": "^17.2.1",
     "express": "^4.21.2",
+    "node-fetch": "^3.3.2",
     "node-telegram-bot-api": "^0.66.0"
   }
 }
