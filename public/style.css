@@ -5,8 +5,9 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+ background: url('/beyond-bg.png') no-repeat center center fixed;
+  background-size: cover;
 }
-
 .banner img {
   width: 100%;
   display: block;
